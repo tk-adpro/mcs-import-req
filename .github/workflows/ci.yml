@@ -92,6 +92,8 @@ jobs:
             ${{ runner.os }}-gradle-
       - name: Run tests
         run: |
+          gradle clean
+          gradle build
           gradle check --info --stacktrace
           gradle test
           gradle jacocoTestReport
