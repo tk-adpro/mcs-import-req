@@ -19,7 +19,7 @@ public class RequestTest {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             new Request("Nintendo Switch", "http://example.com/image.jpg", -100.0, "http://example.com", "USD");
         });
-        assertEquals("Price cannot be negative", exception.getMessage());
+        assertEquals("Price cannot be negative or zero", exception.getMessage());
     }
 
     @Test
@@ -27,7 +27,7 @@ public class RequestTest {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             new Request(null, "http://example.com/image.jpg", 100.0, "http://example.com", "USD");
         });
-        assertEquals("Product name cannot be null", exception.getMessage()); // Ubah pesan yang diharapkan menjadi "Product name cannot be null"
+        assertEquals("Product name cannot be empty", exception.getMessage()); // Ubah pesan yang diharapkan menjadi "Product name cannot be null"
     }
 
     @Test
@@ -35,7 +35,7 @@ public class RequestTest {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             new Request("Nintendo Switch", "", 100.0, "http://example.com", "USD");
         });
-        assertEquals("Image URL cannot be null", exception.getMessage());
+        assertEquals("Image URL cannot be empty", exception.getMessage());
     }
 
     @Test
@@ -43,7 +43,7 @@ public class RequestTest {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             new Request("Nintendo Switch", null, 100.0, "http://example.com", "USD");
         });
-        assertEquals("Image URL cannot be null", exception.getMessage());
+        assertEquals("Image URL cannot be empty", exception.getMessage());
     }
 
     @Test
@@ -59,7 +59,7 @@ public class RequestTest {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             new Request("Nintendo Switch", "http://example.com/image.jpg", 100.0, null, "USD");
         });
-        assertEquals("Store URL cannot be null", exception.getMessage());
+        assertEquals("Store URL cannot be empty", exception.getMessage());
     }
 
     @Test
@@ -75,7 +75,7 @@ public class RequestTest {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             new Request("Nintendo Switch", "http://example.com/image.jpg", 100.0, "http://example.com", null);
         });
-        assertEquals("Currency cannot be null", exception.getMessage());
+        assertEquals("Currency cannot be empty", exception.getMessage());
     }
 
     @Test
