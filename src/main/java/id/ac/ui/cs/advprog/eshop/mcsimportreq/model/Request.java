@@ -1,7 +1,6 @@
 package id.ac.ui.cs.advprog.eshop.mcsimportreq.model;
 
 import lombok.Data;
-import org.springframework.util.StringUtils;
 
 @Data
 public class Request {
@@ -21,16 +20,25 @@ public class Request {
     }
 
     public void setProductName(String productName) {
-        if (StringUtils.isEmpty(productName)) {
-            throw new IllegalArgumentException("Product name cannot be empty");
-        }
         this.productName = productName;
     }
 
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
     public void setPrice(Double price) {
-        if (price != null && price < 0) {
-            throw new IllegalArgumentException("Price cannot be negative");
+        if (price == null || price < 0) {
+            throw new IllegalArgumentException("Price must be positive");
         }
         this.price = price;
+    }
+
+    public void setStoreUrl(String storeUrl) {
+        this.storeUrl = storeUrl;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 }
