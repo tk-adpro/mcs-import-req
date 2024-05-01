@@ -23,10 +23,18 @@ public class RequestRepository {
 
     public Request findRequestById(Long requestId) {
         for (Request savedRequest : requests) {
-            if (savedRequest.getId().equals(savedRequest.getId())) {
+            if (savedRequest.getId().equals(requestId)) {
                 return savedRequest;
             }
         }
         return null;
+    }
+
+    public void deleteRequestById(Long requestId) {
+        requests.removeIf(request -> request.getId().equals(requestId));
+    }
+
+    public List<Request> getAllRequests() {
+        return requests;
     }
 }
