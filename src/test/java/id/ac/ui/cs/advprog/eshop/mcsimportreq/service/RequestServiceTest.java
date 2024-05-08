@@ -109,4 +109,25 @@ public class RequestServiceTest {
 
         verifyNoInteractions(requestRepository);
     }
+
+    @Test
+    void testDeleteRequest_Success() {
+        Long requestId = 1L;
+        doNothing().when(requestRepository).deleteRequestById(requestId);
+
+        assertDoesNotThrow(() -> requestService.deleteRequest(requestId));
+
+        verify(requestRepository, times(1)).deleteRequestById(requestId);
+    }
+
+    @Test
+    void testDeleteRequest_Failure() {
+        Long requestId = 1L;
+        doThrow(new IllegalArgumentException("Request not found")).when(requestRepository).deleteRequestById(requestId);
+
+        assertThrows(IllegalArgumentException.class, () -> requestService.deleteRequest(requestId));
+
+        verify(requestRepository, times(1)).deleteRequestById(requestId);
+    }
+
 }
