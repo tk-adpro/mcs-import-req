@@ -42,4 +42,13 @@ public class RequestController {
         }
     }
 
+    @DeleteMapping("/delete/{requestId}")
+    public ResponseEntity<Void> deleteRequest(@PathVariable Long requestId) {
+        try {
+            requestService.deleteRequest(requestId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 }
