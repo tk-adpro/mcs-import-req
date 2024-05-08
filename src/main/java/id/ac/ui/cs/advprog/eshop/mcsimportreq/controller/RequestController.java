@@ -26,13 +26,13 @@ public class RequestController {
         }
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<Request> createRequest(@RequestBody Request request) {
         Request savedRequest = requestService.saveRequest(request);
         return new ResponseEntity<>(savedRequest, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{requestId}")
+    @PutMapping("/edit/{requestId}")
     public ResponseEntity<Request> updateRequest(@PathVariable Long requestId, @RequestBody Request updatedRequest) {
         try {
             Request result = requestService.updateRequest(requestId, updatedRequest);
