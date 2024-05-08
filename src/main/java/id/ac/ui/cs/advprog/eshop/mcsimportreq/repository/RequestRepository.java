@@ -1,40 +1,28 @@
 package id.ac.ui.cs.advprog.eshop.mcsimportreq.repository;
 
 import id.ac.ui.cs.advprog.eshop.mcsimportreq.model.Request;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
+import java.util.Optional;
 import java.util.List;
 
 @Repository
-public class RequestRepository {
-    private List<Request> requests = new ArrayList<>();
+public interface RequestRepository extends JpaRepository<Request, Long> {
 
-    public Request save(Request request) {
-        for (int i = 0; i < requests.size(); i++) {
-            if (requests.get(i).getId().equals(request.getId())) {
-                requests.set(i, request);
-                return request;
-            }
-        }
-        requests.add(request);
-        return request;
-    }
+    // Metode untuk mendapatkan semua request
+    @Override
+    List<Request> findAll();
 
-    public Request findRequestById(Long requestId) {
-        for (Request savedRequest : requests) {
-            if (savedRequest.getId().equals(requestId)) {
-                return savedRequest;
-            }
-        }
-        return null;
-    }
+    // Metode untuk menyimpan atau update request
+    @Override
+    <S extends Request> S save(S entity);
 
-    public void deleteRequestById(Long requestId) {
-        requests.removeIf(request -> request.getId().equals(requestId));
-    }
+    // Metode untuk mencari request berdasarkan ID
+    @Override
+    Optional<Request> findById(Long requestId);
 
-    public List<Request> getAllRequests() {
-        return requests;
-    }
+    // Metode untuk menghapus request berdasarkan ID
+    @Override
+    void deleteById(Long requestId);
 }
