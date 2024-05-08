@@ -12,6 +12,10 @@ import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 public class RequestControllerTest {
@@ -104,6 +108,28 @@ public class RequestControllerTest {
         ResponseEntity<Request> response = requestController.updateRequest(requestId, request);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    void deleteRequest_Success() {
+        Long requestId = 1L;
+        doNothing().when(requestService).deleteRequest(requestId);
+
+        ResponseEntity<Void> response = requestController.deleteRequest(requestId);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(requestService, times(1)).deleteRequest(requestId);
+    }
+
+    @Test
+    void deleteRequest_NotFound() {
+        Long requestId = 1L;
+        doThrow(new IllegalArgumentException()).when(requestService).deleteRequest(requestId);
+
+        ResponseEntity<Void> response = requestController.deleteRequest(requestId);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(requestService, times(1)).deleteRequest(requestId);
     }
 }
 
