@@ -32,19 +32,14 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public Request updateRequest(Long requestId, Request updatedRequest) {
-        // Memastikan request dengan ID tersebut ada sebelum memperbarui
-        Request existingRequest = requestRepository.findById(requestId)
-                .orElseThrow(() -> new IllegalArgumentException("Request not found with ID: " + requestId));
-
-        // Copy properties yang perlu diupdate dari updatedRequest ke existingRequest
-        existingRequest.setProductName(updatedRequest.getProductName());
-        existingRequest.setImageUrl(updatedRequest.getImageUrl());
-        existingRequest.setPrice(updatedRequest.getPrice());
-        existingRequest.setStoreUrl(updatedRequest.getStoreUrl());
-        existingRequest.setCurrency(updatedRequest.getCurrency());
-
-        // Simpan perubahan ke database
-        return requestRepository.save(existingRequest);
+        return requestRepository.findById(requestId).map(existingRequest -> {
+            existingRequest.setProductName(updatedRequest.getProductName());
+            existingRequest.setImageUrl(updatedRequest.getImageUrl());
+            existingRequest.setPrice(updatedRequest.getPrice());
+            existingRequest.setStoreUrl(updatedRequest.getStoreUrl());
+            existingRequest.setCurrency(updatedRequest.getCurrency());
+            return requestRepository.save(existingRequest);
+        }).orElseThrow(() -> new IllegalArgumentException("Request not found with ID: " + requestId));
     }
 
     @Override

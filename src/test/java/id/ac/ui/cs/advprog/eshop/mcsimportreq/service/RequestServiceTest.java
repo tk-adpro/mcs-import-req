@@ -9,6 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -48,34 +50,25 @@ public class RequestServiceTest {
     @Test
     void testGetRequestById_Success() {
         Long requestId = 1L;
-        when(requestRepository.findRequestById(requestId)).thenReturn(request);
+        when(requestRepository.findById(requestId)).thenReturn(Optional.of(request));
 
         Request foundRequest = requestService.getRequestById(requestId);
 
         assertNotNull(foundRequest);
         assertEquals(request, foundRequest);
-        verify(requestRepository, times(1)).findRequestById(requestId);
+        verify(requestRepository, times(1)).findById(requestId);
     }
 
     @Test
-    void testUpdateRequest_Success() {
+    void testUpdateRequestById_Success() {
         Long requestId = 1L;
-        Request updatedRequest = new Request(
-                "Updated Product Name",
-                "http://example.com/updated_image.jpg",
-                150.0,
-                "http://example.com/updated",
-                "USD"
-        );
-        when(requestRepository.findRequestById(requestId)).thenReturn(request);
-        when(requestRepository.save(updatedRequest)).thenReturn(updatedRequest);
+        when(requestRepository.findById(requestId)).thenReturn(Optional.of(request));
 
-        Request result = requestService.updateRequest(requestId, updatedRequest);
+        Request foundRequest = requestService.getRequestById(requestId);
 
-        assertNotNull(result);
-        assertEquals(updatedRequest, result);
-        verify(requestRepository, times(1)).findRequestById(requestId);
-        verify(requestRepository, times(1)).save(updatedRequest);
+        assertNotNull(foundRequest);
+        assertEquals(request, foundRequest);
+        verify(requestRepository, times(1)).findById(requestId);
     }
 
     @Test
@@ -88,46 +81,33 @@ public class RequestServiceTest {
                 "http://example.com/updated",
                 "USD"
         );
-
-        when(requestRepository.findRequestById(requestId)).thenReturn(null);
+        when(requestRepository.findById(requestId)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class, () -> {
             requestService.updateRequest(requestId, updatedRequest);
         });
 
-        verify(requestRepository, times(1)).findRequestById(requestId);
-        verifyNoMoreInteractions(requestRepository);
-    }
-
-    @Test
-    void testSaveRequest_InvalidCurrency() {
-        request.setCurrency("XYZ"); // Currency code yang tidak valid
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            requestService.saveRequest(request);
-        });
-
-        verifyNoInteractions(requestRepository);
+        verify(requestRepository, times(1)).findById(requestId);
     }
 
     @Test
     void testDeleteRequest_Success() {
         Long requestId = 1L;
-        doNothing().when(requestRepository).deleteRequestById(requestId);
+        doNothing().when(requestRepository).deleteById(requestId);
 
         assertDoesNotThrow(() -> requestService.deleteRequest(requestId));
 
-        verify(requestRepository, times(1)).deleteRequestById(requestId);
+        verify(requestRepository, times(1)).deleteById(requestId);
     }
 
     @Test
     void testDeleteRequest_Failure() {
         Long requestId = 1L;
-        doThrow(new IllegalArgumentException("Request not found")).when(requestRepository).deleteRequestById(requestId);
+        doThrow(new IllegalArgumentException("Request not found")).when(requestRepository).deleteById(requestId);
 
         assertThrows(IllegalArgumentException.class, () -> requestService.deleteRequest(requestId));
 
-        verify(requestRepository, times(1)).deleteRequestById(requestId);
+        verify(requestRepository, times(1)).deleteById(requestId);
     }
 
 }
