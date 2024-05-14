@@ -11,6 +11,7 @@ ENV JDBC_DATABASE_USERNAME ${JDBC_DATABASE_USERNAME}
 
 WORKDIR /app
 EXPOSE 8080
-#CMD ["java","-jar","mcs-import-req-0.0.1-SNAPSHOT.jar"]
-ENTRYPOINT ["java"]
-CMD ["-jar", "app.jar"]
+COPY ./mcs-import-req-0.0.1-SNAPSHOT.jar /app
+CMD ["java","-jar","mcs-import-req-0.0.1-SNAPSHOT.jar"]
+#ENTRYPOINT ["java"]
+#CMD ["-jar", "app.jar"]
