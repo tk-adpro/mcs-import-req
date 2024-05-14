@@ -2,7 +2,6 @@ package id.ac.ui.cs.advprog.eshop.mcsimportreq.service;
 
 import id.ac.ui.cs.advprog.eshop.mcsimportreq.model.Request;
 import id.ac.ui.cs.advprog.eshop.mcsimportreq.repository.RequestRepository;
-import id.ac.ui.cs.advprog.eshop.mcsimportreq.service.RequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +15,6 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public Request saveRequest(Request request) {
-        // Logika validasi atau transformasi bisa di sini
         return requestRepository.save(request);
     }
 

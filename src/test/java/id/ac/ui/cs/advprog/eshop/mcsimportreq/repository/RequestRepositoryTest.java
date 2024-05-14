@@ -3,15 +3,14 @@ package id.ac.ui.cs.advprog.eshop.mcsimportreq.repository;
 import id.ac.ui.cs.advprog.eshop.mcsimportreq.model.Request;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 @DataJpaTest
 @TestPropertySource(locations = "classpath:application-test.properties")
@@ -20,19 +19,26 @@ public class RequestRepositoryTest {
     @Autowired
     private RequestRepository requestRepository;
 
-    @Test
-    public void testSaveAndRetrieveRequest() {
-        Request request = new Request("Nintendo Switch", "http://example.com/image.jpg", 100.0, "http://example.com", "USD");
-        Request savedRequest = requestRepository.save(request);
+@Test
+public void testSaveAndRetrieveRequest() {
+    Request request = new Request("Nintendo Switch", "http://example.com/image.jpg", 100.0, "http://example.com", "USD");
 
-        assertThat(savedRequest).isNotNull();
-        assertThat(savedRequest.getId()).isNotNull();
-        assertThat(savedRequest.getProductName()).isEqualTo("Nintendo Switch");
+    Request savedRequest = requestRepository.save(request);
+    assertThat(savedRequest).isNotNull();
+    assertThat(savedRequest.getId()).isNotNull();
+    assertThat(savedRequest.getProductName()).isEqualTo("Nintendo Switch");
 
-        Request foundRequest = requestRepository.findById(savedRequest.getId()).orElse(null);
-        assertThat(foundRequest).isNotNull();
+    Optional<Request> foundRequestOptional = requestRepository.findById(savedRequest.getId());
+
+    assertThat(foundRequestOptional).isPresent();
+    foundRequestOptional.ifPresent(foundRequest -> {
         assertThat(foundRequest.getProductName()).isEqualTo("Nintendo Switch");
-    }
+        assertThat(foundRequest.getImageUrl()).isEqualTo("http://example.com/image.jpg");
+        assertThat(foundRequest.getPrice()).isEqualTo(100.0);
+        assertThat(foundRequest.getStoreUrl()).isEqualTo("http://example.com");
+        assertThat(foundRequest.getCurrency()).isEqualTo("USD");
+    });
+}
 
     @Test
     public void testUpdateRequest() {
