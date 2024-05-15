@@ -3,27 +3,21 @@ package id.ac.ui.cs.advprog.eshop.mcsimportreq.repository;
 import id.ac.ui.cs.advprog.eshop.mcsimportreq.model.Request;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 public class RequestRepositoryTest {
-    @Mock
+
     private RequestRepository requestRepository;
     private Request request;
 
     @BeforeEach
     void setUp() {
+        requestRepository = new RequestRepository();
         request = new Request(
                 "Nintendo Switch",
                 "http://example.com/image.jpg",
@@ -37,61 +31,43 @@ public class RequestRepositoryTest {
 
     @Test
     void testSaveRequest() {
-        Request request = new Request("Nintendo Switch", "http://example.com/image.jpg", 100.0, "http://example.com", "USD");
-        when(requestRepository.save(request)).thenReturn(request);
+        Request request = new Request("PlayStation 5", "http://example.com/ps5.jpg", 500.0, "http://example.com", "USD");
+        request.setId(2L);
 
         Request savedRequest = requestRepository.save(request);
 
         assertEquals(request, savedRequest);
-        verify(requestRepository, times(1)).save(request);
+        assertEquals(2, requestRepository.getAllRequests().size());
     }
 
     @Test
     void testFindRequestById() {
         Long requestId = 1L;
-        Request request = new Request("Nintendo Switch", "http://example.com/image.jpg", 100.0, "http://example.com", "USD");
-        when(requestRepository.findRequestById(requestId)).thenReturn(request);
-
         Request foundRequest = requestRepository.findRequestById(requestId);
 
         assertEquals(request, foundRequest);
-        verify(requestRepository, times(1)).findRequestById(requestId);
     }
 
     @Test
     void testFindByIdIfIdFound() {
         Long requestId = 1L;
-        Request request = new Request("Nintendo Switch", "http://example.com/image.jpg", 100.0, "http://example.com", "USD");
-        when(requestRepository.findRequestById(requestId)).thenReturn(request);
-
         Request foundRequest = requestRepository.findRequestById(requestId);
 
         assertEquals(request, foundRequest);
-        verify(requestRepository, times(1)).findRequestById(requestId);
     }
 
     @Test
     void testFindByIdIfIdNotFound() {
-        Long requestId = 1L;
-        when(requestRepository.findRequestById(requestId)).thenReturn(null);
-
+        Long requestId = 99L;
         Request foundRequest = requestRepository.findRequestById(requestId);
 
         assertNull(foundRequest);
-        verify(requestRepository, times(1)).findRequestById(requestId);
     }
 
     @Test
     void testUpdateRequest() {
-        Request originalRequest = new Request("Nintendo Switch", "http://example.com/image.jpg", 100.0, "http://example.com", "USD");
-        originalRequest.setId(1L);
-
         Request updatedRequest = new Request("Nintendo Switch", "http://example.com/new_image.jpg", 150.0, "http://example.com", "USD");
         updatedRequest.setId(1L);
-
-        when(requestRepository.save(eq(updatedRequest))).thenReturn(updatedRequest);
-
-        when(requestRepository.findRequestById(1L)).thenReturn(updatedRequest);
 
         requestRepository.save(updatedRequest);
 
@@ -99,21 +75,16 @@ public class RequestRepositoryTest {
 
         assertEquals(150.0, fetchedRequest.getPrice());
         assertEquals("http://example.com/new_image.jpg", fetchedRequest.getImageUrl());
-        verify(requestRepository).save(updatedRequest);
-        verify(requestRepository).findRequestById(1L);
+        assertEquals(1, requestRepository.getAllRequests().size());
     }
-
 
     @Test
     void testDeleteExistingRequest() {
         Long requestId = 1L;
-        Request request = new Request("Nintendo Switch", "http://example.com/image.jpg", 100.0, "http://example.com", "USD");
-        request.setId(requestId);
-        requestRepository.save(request);
-
         requestRepository.deleteRequestById(requestId);
 
         assertNull(requestRepository.findRequestById(requestId));
+        assertEquals(0, requestRepository.getAllRequests().size());
     }
 
     @Test
@@ -121,44 +92,32 @@ public class RequestRepositoryTest {
         Long requestId = 99L;
         requestRepository.deleteRequestById(requestId);
         Request foundRequest = requestRepository.findRequestById(requestId);
-        assertNull(foundRequest);
-    }
 
-    @Test
-    void testAddDuplicateRequest() {
-        Request request = new Request("Nintendo Switch", "http://example.com/image.jpg", 100.0, "http://example.com", "USD");
-        requestRepository.save(request);
-        try {
-            requestRepository.save(request);
-        } catch (Exception e) {
-            assertThat(e).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Duplicate");
-        }
+        assertNull(foundRequest);
+        assertEquals(1, requestRepository.getAllRequests().size());
     }
 
     @Test
     void testGetAllRequests() {
-        Request request1 = new Request("Nintendo Switch", "http://example.com/image.jpg", 100.0, "http://example.com", "USD");
-        Request request2 = new Request("PlayStation 5", "http://example.com/ps5.jpg", 500.0, "http://example.com", "USD");
-
-        List<Request> requests = Arrays.asList(request1, request2);
-
-        when(requestRepository.getAllRequests()).thenReturn(requests);
+        Request request1 = new Request("PlayStation 5", "http://example.com/ps5.jpg", 500.0, "http://example.com", "USD");
+        request1.setId(2L);
+        requestRepository.save(request1);
 
         List<Request> allRequests = requestRepository.getAllRequests();
 
         assertEquals(2, allRequests.size());
-        verify(requestRepository, times(1)).getAllRequests();
+        assertThat(allRequests).containsExactlyInAnyOrder(request, request1);
     }
 
     @Test
-    void testDeleteIfIdNotFound() {
-        Long requestIdNotPresent = 99L;
+    void testAddDuplicateRequest() {
+        Request duplicateRequest = new Request("Nintendo Switch", "http://example.com/image.jpg", 100.0, "http://example.com", "USD");
+        duplicateRequest.setId(1L);
 
-        requestRepository.deleteRequestById(requestIdNotPresent);
+        requestRepository.save(duplicateRequest);
 
-        verify(requestRepository).deleteRequestById(requestIdNotPresent);
-
-        assertNull(requestRepository.findRequestById(requestIdNotPresent));
+        assertEquals(1, requestRepository.getAllRequests().size());
+        Request foundRequest = requestRepository.findRequestById(1L);
+        assertEquals(duplicateRequest, foundRequest);
     }
-
 }
