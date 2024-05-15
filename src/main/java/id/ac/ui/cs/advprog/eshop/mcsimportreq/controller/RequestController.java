@@ -16,7 +16,7 @@ public class RequestController {
         this.requestService = requestService;
     }
 
-    @GetMapping("/{requestId}")
+    @GetMapping("/requests/{requestId}")
     public ResponseEntity<Request> getRequestById(@PathVariable Long requestId) {
         Request request = requestService.getRequestById(requestId);
         if (request != null) {
