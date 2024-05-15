@@ -44,7 +44,7 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
     implementation("jakarta.persistence:jakarta.persistence-api:3.0.0")
     implementation("javax.persistence:javax.persistence-api:2.2")
-
+    testImplementation("com.h2database:h2")
 
 }
 

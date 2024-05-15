@@ -3,6 +3,7 @@ package id.ac.ui.cs.advprog.eshop.mcsimportreq.repository;
 import id.ac.ui.cs.advprog.eshop.mcsimportreq.model.Request;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,7 +14,8 @@ import java.util.List;
 import java.util.Optional;
 
 @DataJpaTest
-@TestPropertySource(locations = "classpath:application-test.properties")
+//@TestPropertySource(locations = "classpath:application-test.properties")
+@ActiveProfiles("test")
 public class RequestRepositoryTest {
 
     @Autowired
