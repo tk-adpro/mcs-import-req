@@ -1,16 +1,31 @@
 package id.ac.ui.cs.advprog.eshop.mcsimportreq.model;
 
 import lombok.Data;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.util.StringUtils;
 
 @Data
+@Entity
+@Getter
+@Setter
 public class Request {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String productName;
     private String imageUrl;
     private Double price;
     private String storeUrl;
     private String currency;
+
+    // No-arg constructor
+    public Request() {
+    }
 
     public Request(String productName, String imageUrl, Double price, String storeUrl, String currency) {
         setProductName(productName);

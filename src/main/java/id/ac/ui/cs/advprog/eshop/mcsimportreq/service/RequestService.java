@@ -15,4 +15,5 @@ public interface RequestService {
     Request updateRequest(Long requestId, Request request);
 
     void deleteRequest(Long requestId);
+    double getExchangeRate(String currencyCode);
 }

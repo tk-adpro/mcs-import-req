@@ -4,19 +4,22 @@ import id.ac.ui.cs.advprog.eshop.mcsimportreq.model.Request;
 import id.ac.ui.cs.advprog.eshop.mcsimportreq.repository.RequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class RequestServiceImpl implements RequestService {
 
-    private final RequestRepository requestRepository;
+    @Autowired
+    private RequestRepository requestRepository;
+    private static final String API_URL = "https://api.exchangerate-api.com/v4/latest/IDR";
 
     @Autowired
-    public RequestServiceImpl(RequestRepository requestRepository) {
-        this.requestRepository = requestRepository;
-    }
+    private RestTemplate restTemplate;
 
     @Override
     public Request saveRequest(Request request) {
@@ -59,26 +62,34 @@ public class RequestServiceImpl implements RequestService {
 
     private void validateCurrency(String currencyCode) {
         try {
-            Currency.getInstance(currencyCode);
+            Currency currency = Currency.getInstance(currencyCode);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid currency code");
         }
     }
 
-    private double convertToIDR(double price, String currencyCode) {
+    public double getExchangeRate(String currencyCode) {
+        Map<String, Object> response = restTemplate.getForObject(API_URL, Map.class);
 
-        // Asumsikan kurs IDR/USD = 14000
-        if (currencyCode.equalsIgnoreCase("USD")) {
-            return price * 14000;
-        }
-        // Asumsikan kurs IDR/JPY = 130
-        else if (currencyCode.equalsIgnoreCase("JPY")) {
-            return price * 130;
-        }
-        else if (currencyCode.equalsIgnoreCase("IDR")) {
-            return price;
+        Map<String, Double> rates = (Map<String, Double>) response.get("rates");
+        if (rates.containsKey(currencyCode)) {
+            double plainRate = rates.get(currencyCode);
+            BigDecimal scientificNumber = new BigDecimal(plainRate);
+
+            // Convert it to plain string representation
+            String plainString = scientificNumber.toPlainString();
+            return Double.valueOf(plainString);
         } else {
             throw new IllegalArgumentException("Unsupported currency");
+        }
+    }
+
+    public double convertToIDR(double price, String currencyCode) {
+        if (currencyCode.equalsIgnoreCase("IDR")) {
+            return price;
+        } else {
+            double rate = getExchangeRate(currencyCode);
+            return price * rate;
         }
     }
 }
