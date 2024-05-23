@@ -1,17 +1,21 @@
 package id.ac.ui.cs.advprog.eshop.mcsimportreq.controller;
+
 import id.ac.ui.cs.advprog.eshop.mcsimportreq.model.Request;
 import id.ac.ui.cs.advprog.eshop.mcsimportreq.service.RequestService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/requests")
+@RequestMapping("/api/requests")
 public class RequestController {
 
-    private final RequestService requestService;
+    private RequestService requestService;
 
+    @Autowired
     public RequestController(RequestService requestService) {
         this.requestService = requestService;
     }
