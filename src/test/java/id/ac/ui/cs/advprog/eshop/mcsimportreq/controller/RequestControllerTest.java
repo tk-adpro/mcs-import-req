@@ -1,4 +1,5 @@
 package id.ac.ui.cs.advprog.eshop.mcsimportreq.controller;
+
 import id.ac.ui.cs.advprog.eshop.mcsimportreq.model.Request;
 import id.ac.ui.cs.advprog.eshop.mcsimportreq.service.RequestService;
 
@@ -7,16 +8,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class RequestControllerTest {
@@ -33,8 +33,9 @@ public class RequestControllerTest {
 
     @Test
     void getRequestById_Exists() {
-        Long requestId = 1L;
+        UUID requestId = UUID.randomUUID();
         Request request = new Request(
+                requestId,
                 "Product Name",
                 "http://example.com/image.jpg",
                 100.0,
@@ -51,7 +52,7 @@ public class RequestControllerTest {
 
     @Test
     void getRequestById_NotFound() {
-        Long requestId = 1L;
+        UUID requestId = UUID.randomUUID();
         when(requestService.getRequestById(requestId)).thenReturn(null);
 
         ResponseEntity<Request> response = requestController.getRequestById(requestId);
@@ -61,7 +62,9 @@ public class RequestControllerTest {
 
     @Test
     void createRequest() {
+        UUID requestId = UUID.randomUUID();
         Request request = new Request(
+                requestId,
                 "Product Name",
                 "http://example.com/image.jpg",
                 100.0,
@@ -78,8 +81,9 @@ public class RequestControllerTest {
 
     @Test
     void updateRequest_Success() {
-        Long requestId = 1L;
+        UUID requestId = UUID.randomUUID();
         Request request = new Request(
+                requestId,
                 "Product Name",
                 "http://example.com/image.jpg",
                 100.0,
@@ -96,8 +100,9 @@ public class RequestControllerTest {
 
     @Test
     void updateRequest_NotFound() {
-        Long requestId = 1L;
+        UUID requestId = UUID.randomUUID();
         Request request = new Request(
+                requestId,
                 "Product Name",
                 "http://example.com/image.jpg",
                 100.0,
@@ -113,7 +118,7 @@ public class RequestControllerTest {
 
     @Test
     void deleteRequest_Success() {
-        Long requestId = 1L;
+        UUID requestId = UUID.randomUUID();
         doNothing().when(requestService).deleteRequest(requestId);
 
         ResponseEntity<Void> response = requestController.deleteRequest(requestId);
@@ -124,7 +129,7 @@ public class RequestControllerTest {
 
     @Test
     void deleteRequest_NotFound() {
-        Long requestId = 1L;
+        UUID requestId = UUID.randomUUID();
         doThrow(new IllegalArgumentException()).when(requestService).deleteRequest(requestId);
 
         ResponseEntity<Void> response = requestController.deleteRequest(requestId);
@@ -132,5 +137,18 @@ public class RequestControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         verify(requestService, times(1)).deleteRequest(requestId);
     }
-}
 
+    @Test
+    void getAllRequests() {
+        List<Request> requests = Arrays.asList(
+                new Request(UUID.randomUUID(), "Product Name 1", "http://example.com/image1.jpg", 100.0, "http://example.com/1", "USD"),
+                new Request(UUID.randomUUID(), "Product Name 2", "http://example.com/image2.jpg", 200.0, "http://example.com/2", "USD")
+        );
+        when(requestService.getAllRequests()).thenReturn(requests);
+
+        ResponseEntity<List<Request>> response = requestController.getAllRequests();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(requests, response.getBody());
+    }
+}

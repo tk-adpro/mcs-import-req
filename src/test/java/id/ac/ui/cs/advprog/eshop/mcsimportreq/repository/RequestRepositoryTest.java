@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -19,20 +20,19 @@ public class RequestRepositoryTest {
     void setUp() {
         requestRepository = new RequestRepository();
         request = new Request(
+                UUID.randomUUID(),
                 "Nintendo Switch",
                 "http://example.com/image.jpg",
                 100.0,
                 "http://example.com",
                 "USD"
         );
-        request.setId(1L);  // Set ID as this is a manual operation usually done by the database or persistence context
         requestRepository.save(request);
     }
 
     @Test
     void testSaveRequest() {
-        Request request = new Request("PlayStation 5", "http://example.com/ps5.jpg", 500.0, "http://example.com", "USD");
-        request.setId(2L);
+        Request request = new Request(UUID.randomUUID(), "PlayStation 5", "http://example.com/ps5.jpg", 500.0, "http://example.com", "USD");
 
         Request savedRequest = requestRepository.save(request);
 
@@ -42,7 +42,7 @@ public class RequestRepositoryTest {
 
     @Test
     void testFindRequestById() {
-        Long requestId = 1L;
+        UUID requestId = request.getId();
         Request foundRequest = requestRepository.findRequestById(requestId);
 
         assertEquals(request, foundRequest);
@@ -50,7 +50,7 @@ public class RequestRepositoryTest {
 
     @Test
     void testFindByIdIfIdFound() {
-        Long requestId = 1L;
+        UUID requestId = request.getId();
         Request foundRequest = requestRepository.findRequestById(requestId);
 
         assertEquals(request, foundRequest);
@@ -58,7 +58,7 @@ public class RequestRepositoryTest {
 
     @Test
     void testFindByIdIfIdNotFound() {
-        Long requestId = 99L;
+        UUID requestId = UUID.randomUUID();
         Request foundRequest = requestRepository.findRequestById(requestId);
 
         assertNull(foundRequest);
@@ -66,12 +66,11 @@ public class RequestRepositoryTest {
 
     @Test
     void testUpdateRequest() {
-        Request updatedRequest = new Request("Nintendo Switch", "http://example.com/new_image.jpg", 150.0, "http://example.com", "USD");
-        updatedRequest.setId(1L);
+        Request updatedRequest = new Request(request.getId(), "Nintendo Switch", "http://example.com/new_image.jpg", 150.0, "http://example.com", "USD");
 
         requestRepository.save(updatedRequest);
 
-        Request fetchedRequest = requestRepository.findRequestById(1L);
+        Request fetchedRequest = requestRepository.findRequestById(request.getId());
 
         assertEquals(150.0, fetchedRequest.getPrice());
         assertEquals("http://example.com/new_image.jpg", fetchedRequest.getImageUrl());
@@ -80,7 +79,7 @@ public class RequestRepositoryTest {
 
     @Test
     void testDeleteExistingRequest() {
-        Long requestId = 1L;
+        UUID requestId = request.getId();
         requestRepository.deleteRequestById(requestId);
 
         assertNull(requestRepository.findRequestById(requestId));
@@ -89,7 +88,7 @@ public class RequestRepositoryTest {
 
     @Test
     void testDeleteNonExistingRequest() {
-        Long requestId = 99L;
+        UUID requestId = UUID.randomUUID();
         requestRepository.deleteRequestById(requestId);
         Request foundRequest = requestRepository.findRequestById(requestId);
 
@@ -99,8 +98,7 @@ public class RequestRepositoryTest {
 
     @Test
     void testGetAllRequests() {
-        Request request1 = new Request("PlayStation 5", "http://example.com/ps5.jpg", 500.0, "http://example.com", "USD");
-        request1.setId(2L);
+        Request request1 = new Request(UUID.randomUUID(), "PlayStation 5", "http://example.com/ps5.jpg", 500.0, "http://example.com", "USD");
         requestRepository.save(request1);
 
         List<Request> allRequests = requestRepository.getAllRequests();
@@ -111,13 +109,12 @@ public class RequestRepositoryTest {
 
     @Test
     void testAddDuplicateRequest() {
-        Request duplicateRequest = new Request("Nintendo Switch", "http://example.com/image.jpg", 100.0, "http://example.com", "USD");
-        duplicateRequest.setId(1L);
+        Request duplicateRequest = new Request(request.getId(), "Nintendo Switch", "http://example.com/image.jpg", 100.0, "http://example.com", "USD");
 
         requestRepository.save(duplicateRequest);
 
         assertEquals(1, requestRepository.getAllRequests().size());
-        Request foundRequest = requestRepository.findRequestById(1L);
+        Request foundRequest = requestRepository.findRequestById(request.getId());
         assertEquals(duplicateRequest, foundRequest);
     }
 }

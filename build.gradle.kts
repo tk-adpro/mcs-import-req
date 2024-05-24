@@ -43,6 +43,7 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     runtimeOnly("org.postgresql:postgresql")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation ("com.fasterxml.jackson.core:jackson-databind")
 }
 
 tasks.withType<Test> {

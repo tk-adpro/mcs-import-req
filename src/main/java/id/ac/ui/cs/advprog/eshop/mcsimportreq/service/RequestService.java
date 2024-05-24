@@ -3,17 +3,18 @@ package id.ac.ui.cs.advprog.eshop.mcsimportreq.service;
 import id.ac.ui.cs.advprog.eshop.mcsimportreq.model.Request;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface RequestService {
 
     Request saveRequest(Request request);
 
-    Request getRequestById(Long requestId);
+    Request getRequestById(UUID requestId);
 
     List<Request> getAllRequests();
 
-    Request updateRequest(Long requestId, Request request);
+    Request updateRequest(UUID requestId, Request request);
 
-    void deleteRequest(Long requestId);
+    void deleteRequest(UUID requestId);
     double getExchangeRate(String currencyCode);
 }

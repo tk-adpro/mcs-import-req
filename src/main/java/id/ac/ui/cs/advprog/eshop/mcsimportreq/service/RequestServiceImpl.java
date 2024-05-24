@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class RequestServiceImpl implements RequestService {
@@ -33,7 +34,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public Request getRequestById(Long requestId) {
+    public Request getRequestById(UUID requestId) {
         return requestRepository.findRequestById(requestId);
     }
 
@@ -43,7 +44,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public Request updateRequest(Long requestId, Request updatedRequest) {
+    public Request updateRequest(UUID requestId, Request updatedRequest) {
         Request existingRequest = requestRepository.findRequestById(requestId);
         if (existingRequest == null) {
             throw new IllegalArgumentException("Request not found");
@@ -56,15 +57,26 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public void deleteRequest(Long requestId) {
+    public void deleteRequest(UUID requestId) {
         requestRepository.deleteRequestById(requestId);
     }
 
+//    private void validateCurrency(String currencyCode) {
+//        try {
+//            Currency currency = Currency.getInstance(currencyCode);
+//        } catch (IllegalArgumentException e) {
+//            throw new IllegalArgumentException("Invalid currency code");
+//        }
+//    }
+
     private void validateCurrency(String currencyCode) {
+        if (currencyCode == null || currencyCode.isEmpty()) {
+            throw new IllegalArgumentException("Currency code cannot be null or empty");
+        }
         try {
-            Currency currency = Currency.getInstance(currencyCode);
+            Currency.getInstance(currencyCode);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid currency code");
+            throw new IllegalArgumentException("Invalid currency code: " + currencyCode);
         }
     }
 

@@ -2,21 +2,15 @@ package id.ac.ui.cs.advprog.eshop.mcsimportreq.model;
 
 import lombok.Data;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.Getter;
-import lombok.Setter;
+import java.util.UUID;
 import org.springframework.util.StringUtils;
 
 @Data
 @Entity
-@Getter
-@Setter
 public class Request {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
     private String productName;
     private String imageUrl;
     private Double price;
@@ -27,7 +21,8 @@ public class Request {
     public Request() {
     }
 
-    public Request(String productName, String imageUrl, Double price, String storeUrl, String currency) {
+    public Request(UUID id, String productName, String imageUrl, Double price, String storeUrl, String currency) {
+        this.id = id;
         setProductName(productName);
         setImageUrl(imageUrl);
         setPrice(price);
