@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public class RequestRepository {
@@ -21,7 +22,7 @@ public class RequestRepository {
         return request;
     }
 
-    public Request findRequestById(Long requestId) {
+    public Request findRequestById(UUID requestId) {
         for (Request savedRequest : requests) {
             if (savedRequest.getId().equals(requestId)) {
                 return savedRequest;
@@ -30,7 +31,7 @@ public class RequestRepository {
         return null;
     }
 
-    public void deleteRequestById(Long requestId) {
+    public void deleteRequestById(UUID requestId) {
         requests.removeIf(request -> request.getId().equals(requestId));
     }
 

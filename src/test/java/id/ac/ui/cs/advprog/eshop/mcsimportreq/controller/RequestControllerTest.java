@@ -1,4 +1,5 @@
 package id.ac.ui.cs.advprog.eshop.mcsimportreq.controller;
+
 import id.ac.ui.cs.advprog.eshop.mcsimportreq.model.Request;
 import id.ac.ui.cs.advprog.eshop.mcsimportreq.service.RequestService;
 
@@ -7,16 +8,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class RequestControllerTest {
@@ -33,14 +33,15 @@ public class RequestControllerTest {
 
     @Test
     void getRequestById_Exists() {
-        Long requestId = 1L;
-        Request request = new Request(
-                "Product Name",
-                "http://example.com/image.jpg",
-                100.0,
-                "http://example.com",
-                "USD"
-        );
+        UUID requestId = UUID.randomUUID();
+        Request request = new Request.Builder()
+                .setId(requestId)
+                .setProductName("Product Name")
+                .setImageUrl("http://example.com/image.jpg")
+                .setPrice(100.0)
+                .setStoreUrl("http://example.com")
+                .setCurrency("USD")
+                .build();
         when(requestService.getRequestById(requestId)).thenReturn(request);
 
         ResponseEntity<Request> response = requestController.getRequestById(requestId);
@@ -51,7 +52,7 @@ public class RequestControllerTest {
 
     @Test
     void getRequestById_NotFound() {
-        Long requestId = 1L;
+        UUID requestId = UUID.randomUUID();
         when(requestService.getRequestById(requestId)).thenReturn(null);
 
         ResponseEntity<Request> response = requestController.getRequestById(requestId);
@@ -61,13 +62,15 @@ public class RequestControllerTest {
 
     @Test
     void createRequest() {
-        Request request = new Request(
-                "Product Name",
-                "http://example.com/image.jpg",
-                100.0,
-                "http://example.com",
-                "USD"
-        );
+        UUID requestId = UUID.randomUUID();
+        Request request = new Request.Builder()
+                .setId(requestId)
+                .setProductName("Product Name")
+                .setImageUrl("http://example.com/image.jpg")
+                .setPrice(100.0)
+                .setStoreUrl("http://example.com")
+                .setCurrency("USD")
+                .build();
         when(requestService.saveRequest(request)).thenReturn(request);
 
         ResponseEntity<Request> response = requestController.createRequest(request);
@@ -78,14 +81,15 @@ public class RequestControllerTest {
 
     @Test
     void updateRequest_Success() {
-        Long requestId = 1L;
-        Request request = new Request(
-                "Product Name",
-                "http://example.com/image.jpg",
-                100.0,
-                "http://example.com",
-                "USD"
-        );
+        UUID requestId = UUID.randomUUID();
+        Request request = new Request.Builder()
+                .setId(requestId)
+                .setProductName("Product Name")
+                .setImageUrl("http://example.com/image.jpg")
+                .setPrice(100.0)
+                .setStoreUrl("http://example.com")
+                .setCurrency("USD")
+                .build();
         when(requestService.updateRequest(requestId, request)).thenReturn(request);
 
         ResponseEntity<Request> response = requestController.updateRequest(requestId, request);
@@ -96,14 +100,15 @@ public class RequestControllerTest {
 
     @Test
     void updateRequest_NotFound() {
-        Long requestId = 1L;
-        Request request = new Request(
-                "Product Name",
-                "http://example.com/image.jpg",
-                100.0,
-                "http://example.com",
-                "USD"
-        );
+        UUID requestId = UUID.randomUUID();
+        Request request = new Request.Builder()
+                .setId(requestId)
+                .setProductName("Product Name")
+                .setImageUrl("http://example.com/image.jpg")
+                .setPrice(100.0)
+                .setStoreUrl("http://example.com")
+                .setCurrency("USD")
+                .build();
         when(requestService.updateRequest(requestId, request)).thenThrow(IllegalArgumentException.class);
 
         ResponseEntity<Request> response = requestController.updateRequest(requestId, request);
@@ -113,7 +118,7 @@ public class RequestControllerTest {
 
     @Test
     void deleteRequest_Success() {
-        Long requestId = 1L;
+        UUID requestId = UUID.randomUUID();
         doNothing().when(requestService).deleteRequest(requestId);
 
         ResponseEntity<Void> response = requestController.deleteRequest(requestId);
@@ -124,7 +129,7 @@ public class RequestControllerTest {
 
     @Test
     void deleteRequest_NotFound() {
-        Long requestId = 1L;
+        UUID requestId = UUID.randomUUID();
         doThrow(new IllegalArgumentException()).when(requestService).deleteRequest(requestId);
 
         ResponseEntity<Void> response = requestController.deleteRequest(requestId);
@@ -132,5 +137,32 @@ public class RequestControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         verify(requestService, times(1)).deleteRequest(requestId);
     }
-}
 
+    @Test
+    void getAllRequests() {
+        List<Request> requests = Arrays.asList(
+                new Request.Builder()
+                        .setId(UUID.randomUUID())
+                        .setProductName("Product Name 1")
+                        .setImageUrl("http://example.com/image1.jpg")
+                        .setPrice(100.0)
+                        .setStoreUrl("http://example.com/1")
+                        .setCurrency("USD")
+                        .build(),
+                new Request.Builder()
+                        .setId(UUID.randomUUID())
+                        .setProductName("Product Name 2")
+                        .setImageUrl("http://example.com/image2.jpg")
+                        .setPrice(200.0)
+                        .setStoreUrl("http://example.com/2")
+                        .setCurrency("USD")
+                        .build()
+        );
+        when(requestService.getAllRequests()).thenReturn(requests);
+
+        ResponseEntity<List<Request>> response = requestController.getAllRequests();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(requests, response.getBody());
+    }
+}
