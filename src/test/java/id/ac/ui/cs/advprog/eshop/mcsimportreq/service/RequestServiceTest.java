@@ -37,14 +37,14 @@ public class RequestServiceTest {
     @BeforeEach
     void setUp() {
         requestId = UUID.randomUUID();
-        request = new Request(
-                requestId,
-                "Nintendo Switch",
-                "http://example.com/image.jpg",
-                100.0,
-                "http://example.com",
-                "USD"
-        );
+        request = new Request.Builder()
+                .setId(requestId)
+                .setProductName("Nintendo Switch")
+                .setImageUrl("http://example.com/image.jpg")
+                .setPrice(100.0)
+                .setStoreUrl("http://example.com")
+                .setCurrency("USD")
+                .build();
     }
 
     @Test
@@ -78,16 +78,18 @@ public class RequestServiceTest {
 
     @Test
     void testUpdateRequest_Success() {
-        Request updatedRequest = new Request(
-                requestId,
-                "Updated Product Name",
-                "http://example.com/updated_image.jpg",
-                150.0,
-                "http://example.com/updated",
-                "USD"
-        );
+        Request updatedRequest = new Request.Builder()
+                .setId(requestId)
+                .setProductName("Updated Product Name")
+                .setImageUrl("http://example.com/updated_image.jpg")
+                .setPrice(150.0)
+                .setStoreUrl("http://example.com/updated")
+                .setCurrency("USD")
+                .build();
+
         when(requestRepository.findRequestById(requestId)).thenReturn(request);
         when(requestRepository.save(updatedRequest)).thenReturn(updatedRequest);
+
         Map<String, Object> apiResponse = new HashMap<>();
         Map<String, Double> rates = new HashMap<>();
         rates.put("USD", 14000.0);
@@ -107,14 +109,14 @@ public class RequestServiceTest {
     @Test
     void testUpdateRequest_RequestNotFound() {
         UUID requestId = UUID.randomUUID();
-        Request updatedRequest = new Request(
-                requestId,
-                "Updated Product Name",
-                "http://example.com/updated_image.jpg",
-                150.0,
-                "http://example.com/updated",
-                "USD"
-        );
+        Request updatedRequest = new Request.Builder()
+                .setId(requestId)
+                .setProductName("Updated Product Name")
+                .setImageUrl("http://example.com/updated_image.jpg")
+                .setPrice(150.0)
+                .setStoreUrl("http://example.com/updated")
+                .setCurrency("USD")
+                .build();
 
         when(requestRepository.findRequestById(requestId)).thenReturn(null);
 
@@ -219,8 +221,22 @@ public class RequestServiceTest {
 
     @Test
     void testGetAllRequests() {
-        Request request1 = new Request(UUID.randomUUID(), "Product1", "http://example.com/image1.jpg", 100.0, "http://example.com", "USD");
-        Request request2 = new Request(UUID.randomUUID(), "Product2", "http://example.com/image2.jpg", 200.0, "http://example.com", "USD");
+        Request request1 = new Request.Builder()
+                .setId(UUID.randomUUID())
+                .setProductName("Product1")
+                .setImageUrl("http://example.com/image1.jpg")
+                .setPrice(100.0)
+                .setStoreUrl("http://example.com")
+                .setCurrency("USD")
+                .build();
+        Request request2 = new Request.Builder()
+                .setId(UUID.randomUUID())
+                .setProductName("Product2")
+                .setImageUrl("http://example.com/image2.jpg")
+                .setPrice(200.0)
+                .setStoreUrl("http://example.com")
+                .setCurrency("USD")
+                .build();
 
         when(requestRepository.getAllRequests()).thenReturn(Arrays.asList(request1, request2));
 
@@ -229,23 +245,6 @@ public class RequestServiceTest {
         assertEquals("Product1", requests.get(0).getProductName());
         assertEquals("Product2", requests.get(1).getProductName());
     }
-
-    // Additional tests for validateCurrency
-//    @Test
-//    void testValidateCurrency_NullCurrency() {
-//        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-//            requestService.saveRequest(new Request(UUID.randomUUID(), "Nintendo Switch", "http://example.com/image.jpg", 100.0, "http://example.com", null));
-//        });
-//        assertEquals("Currency code cannot be null or empty", exception.getMessage());
-//    }
-//
-//    @Test
-//    void testValidateCurrency_EmptyCurrency() {
-//        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-//            requestService.saveRequest(new Request(UUID.randomUUID(), "Nintendo Switch", "http://example.com/image.jpg", 100.0, "http://example.com", ""));
-//        });
-//        assertEquals("Currency code cannot be null or empty", exception.getMessage());
-//    }
 
     @Test
     void testGetExchangeRate_Success() {

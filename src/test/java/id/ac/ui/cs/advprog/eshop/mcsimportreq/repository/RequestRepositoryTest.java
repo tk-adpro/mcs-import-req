@@ -19,24 +19,31 @@ public class RequestRepositoryTest {
     @BeforeEach
     void setUp() {
         requestRepository = new RequestRepository();
-        request = new Request(
-                UUID.randomUUID(),
-                "Nintendo Switch",
-                "http://example.com/image.jpg",
-                100.0,
-                "http://example.com",
-                "USD"
-        );
+        request = new Request.Builder()
+                .setId(UUID.randomUUID())
+                .setProductName("Nintendo Switch")
+                .setImageUrl("http://example.com/image.jpg")
+                .setPrice(100.0)
+                .setStoreUrl("http://example.com")
+                .setCurrency("USD")
+                .build();
         requestRepository.save(request);
     }
 
     @Test
     void testSaveRequest() {
-        Request request = new Request(UUID.randomUUID(), "PlayStation 5", "http://example.com/ps5.jpg", 500.0, "http://example.com", "USD");
+        Request newRequest = new Request.Builder()
+                .setId(UUID.randomUUID())
+                .setProductName("PlayStation 5")
+                .setImageUrl("http://example.com/ps5.jpg")
+                .setPrice(500.0)
+                .setStoreUrl("http://example.com")
+                .setCurrency("USD")
+                .build();
 
-        Request savedRequest = requestRepository.save(request);
+        Request savedRequest = requestRepository.save(newRequest);
 
-        assertEquals(request, savedRequest);
+        assertEquals(newRequest, savedRequest);
         assertEquals(2, requestRepository.getAllRequests().size());
     }
 
@@ -66,7 +73,14 @@ public class RequestRepositoryTest {
 
     @Test
     void testUpdateRequest() {
-        Request updatedRequest = new Request(request.getId(), "Nintendo Switch", "http://example.com/new_image.jpg", 150.0, "http://example.com", "USD");
+        Request updatedRequest = new Request.Builder()
+                .setId(request.getId())
+                .setProductName("Nintendo Switch")
+                .setImageUrl("http://example.com/new_image.jpg")
+                .setPrice(150.0)
+                .setStoreUrl("http://example.com")
+                .setCurrency("USD")
+                .build();
 
         requestRepository.save(updatedRequest);
 
@@ -98,7 +112,14 @@ public class RequestRepositoryTest {
 
     @Test
     void testGetAllRequests() {
-        Request request1 = new Request(UUID.randomUUID(), "PlayStation 5", "http://example.com/ps5.jpg", 500.0, "http://example.com", "USD");
+        Request request1 = new Request.Builder()
+                .setId(UUID.randomUUID())
+                .setProductName("PlayStation 5")
+                .setImageUrl("http://example.com/ps5.jpg")
+                .setPrice(500.0)
+                .setStoreUrl("http://example.com")
+                .setCurrency("USD")
+                .build();
         requestRepository.save(request1);
 
         List<Request> allRequests = requestRepository.getAllRequests();
@@ -109,7 +130,14 @@ public class RequestRepositoryTest {
 
     @Test
     void testAddDuplicateRequest() {
-        Request duplicateRequest = new Request(request.getId(), "Nintendo Switch", "http://example.com/image.jpg", 100.0, "http://example.com", "USD");
+        Request duplicateRequest = new Request.Builder()
+                .setId(request.getId())
+                .setProductName("Nintendo Switch")
+                .setImageUrl("http://example.com/image.jpg")
+                .setPrice(100.0)
+                .setStoreUrl("http://example.com")
+                .setCurrency("USD")
+                .build();
 
         requestRepository.save(duplicateRequest);
 

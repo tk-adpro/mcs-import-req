@@ -21,47 +21,70 @@ public class Request {
     public Request() {
     }
 
-    public Request(UUID id, String productName, String imageUrl, Double price, String storeUrl, String currency) {
-        this.id = id;
-        setProductName(productName);
-        setImageUrl(imageUrl);
-        setPrice(price);
-        setStoreUrl(storeUrl);
-        setCurrency(currency);
+    private Request(Builder builder) {
+        this.id = builder.id;
+        this.productName = builder.productName;
+        this.imageUrl = builder.imageUrl;
+        this.price = builder.price;
+        this.storeUrl = builder.storeUrl;
+        this.currency = builder.currency;
     }
 
-    public void setProductName(String productName) {
-        if (StringUtils.isEmpty(productName) || productName == null) {
-            throw new IllegalArgumentException("Product name cannot be empty");
-        }
-        this.productName = productName;
-    }
+    public static class Builder {
+        private UUID id;
+        private String productName;
+        private String imageUrl;
+        private Double price;
+        private String storeUrl;
+        private String currency;
 
-    public void setImageUrl(String imageUrl) {
-        if (StringUtils.isEmpty(imageUrl) || imageUrl == null) {
-            throw new IllegalArgumentException("Image URL cannot be empty");
+        public Builder setId(UUID id) {
+            this.id = id;
+            return this;
         }
-        this.imageUrl = imageUrl;
-    }
 
-    public void setPrice(Double price) {
-        if (price == null || price <= 0) {
-            throw new IllegalArgumentException("Price cannot be negative or zero");
+        public Builder setProductName(String productName) {
+            if (StringUtils.isEmpty(productName) || productName == null) {
+                throw new IllegalArgumentException("Product name cannot be empty");
+            }
+            this.productName = productName;
+            return this;
         }
-        this.price = price;
-    }
 
-    public void setStoreUrl(String storeUrl) {
-        if (StringUtils.isEmpty(storeUrl) || storeUrl == null) {
-            throw new IllegalArgumentException("Store URL cannot be empty");
+        public Builder setImageUrl(String imageUrl) {
+            if (StringUtils.isEmpty(imageUrl) || imageUrl == null) {
+                throw new IllegalArgumentException("Image URL cannot be empty");
+            }
+            this.imageUrl = imageUrl;
+            return this;
         }
-        this.storeUrl = storeUrl;
-    }
 
-    public void setCurrency(String currency) {
-        if (StringUtils.isEmpty(currency) || currency == null) {
-            throw new IllegalArgumentException("Currency cannot be empty");
+        public Builder setPrice(Double price) {
+            if (price == null || price <= 0) {
+                throw new IllegalArgumentException("Price cannot be negative or zero");
+            }
+            this.price = price;
+            return this;
         }
-        this.currency = currency;
+
+        public Builder setStoreUrl(String storeUrl) {
+            if (StringUtils.isEmpty(storeUrl) || storeUrl == null) {
+                throw new IllegalArgumentException("Store URL cannot be empty");
+            }
+            this.storeUrl = storeUrl;
+            return this;
+        }
+
+        public Builder setCurrency(String currency) {
+            if (StringUtils.isEmpty(currency) || currency == null) {
+                throw new IllegalArgumentException("Currency cannot be empty");
+            }
+            this.currency = currency;
+            return this;
+        }
+
+        public Request build() {
+            return new Request(this);
+        }
     }
 }
