@@ -5,6 +5,57 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class RequestTest {
+    private void assertCurrencyThrowsException(String currency, String expectedMessage) {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            new Request.Builder()
+                    .setId(UUID.randomUUID())
+                    .setProductName("Nintendo Switch")
+                    .setImageUrl("http://example.com/image.jpg")
+                    .setPrice(100.0)
+                    .setStoreUrl("http://example.com")
+                    .setCurrency(currency)
+                    .build();
+        });
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    private void assertUrlThrowsException(String url, String expectedMessage, String field) {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            Request.Builder builder = new Request.Builder()
+                    .setId(UUID.randomUUID())
+                    .setProductName("Nintendo Switch")
+                    .setPrice(100.0)
+                    .setCurrency("USD");
+
+            if (field.equals("storeUrl")) {
+                builder.setStoreUrl(url);
+            } else if (field.equals("imageUrl")) {
+                builder.setImageUrl(url);
+            }
+
+            builder.build();
+        });
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    private void assertUrlSuccessfullySet(String url, String field) {
+        Request.Builder builder = new Request.Builder()
+                .setId(UUID.randomUUID())
+                .setProductName("Nintendo Switch")
+                .setPrice(100.0)
+                .setCurrency("USD");
+
+        if (field.equals("storeUrl")) {
+            builder.setStoreUrl(url);
+            Request request = builder.build();
+            assertEquals(url, request.getStoreUrl());
+        } else if (field.equals("imageUrl")) {
+            builder.setImageUrl(url);
+            Request request = builder.build();
+            assertEquals(url, request.getImageUrl());
+        }
+    }
+
     // Test for no-arg constructor
     @Test
     void testNoArgConstructor() {
@@ -198,22 +249,6 @@ public class RequestTest {
         assertEquals(validProductName, request.getProductName());
     }
 
-    // Setter tests for imageUrl
-    @Test
-    void testSetImageUrlSuccessfully() {
-        String validImageUrl = "http://example.com/new_image.jpg";
-        Request request = new Request.Builder()
-                .setId(UUID.randomUUID())
-                .setProductName("Nintendo Switch")
-                .setImageUrl(validImageUrl)
-                .setPrice(100.0)
-                .setStoreUrl("http://example.com")
-                .setCurrency("USD")
-                .build();
-
-        assertEquals(validImageUrl, request.getImageUrl());
-    }
-
     @Test
     void testSetImageUrlCannotBeNull() {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -257,22 +292,6 @@ public class RequestTest {
                 .build();
 
         assertEquals(150.0, request.getPrice());
-    }
-
-    // Setter tests for storeUrl
-    @Test
-    void testSetStoreUrlSuccessfully() {
-        String validStoreUrl = "http://example.com/new_store";
-        Request request = new Request.Builder()
-                .setId(UUID.randomUUID())
-                .setProductName("Nintendo Switch")
-                .setImageUrl("http://example.com/image.jpg")
-                .setPrice(100.0)
-                .setStoreUrl(validStoreUrl)
-                .setCurrency("USD")
-                .build();
-
-        assertEquals(validStoreUrl, request.getStoreUrl());
     }
 
     @Test
@@ -566,17 +585,12 @@ public class RequestTest {
 
     @Test
     void testSetCurrencyThrowsExceptionWhenEmpty() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            new Request.Builder()
-                    .setId(UUID.randomUUID())
-                    .setProductName("Nintendo Switch")
-                    .setImageUrl("http://example.com/image.jpg")
-                    .setPrice(100.0)
-                    .setStoreUrl("http://example.com")
-                    .setCurrency("")
-                    .build();
-        });
-        assertEquals("Currency cannot be empty", exception.getMessage());
+        assertCurrencyThrowsException("", "Currency cannot be empty");
+    }
+
+    @Test
+    void testSetCurrencyThrowsExceptionWhenNull() {
+        assertCurrencyThrowsException(null, "Currency cannot be empty");
     }
 
     @Test
@@ -595,36 +609,6 @@ public class RequestTest {
     }
 
     @Test
-    void testSetCurrencyThrowsExceptionWhenNull() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            new Request.Builder()
-                    .setId(UUID.randomUUID())
-                    .setProductName("Nintendo Switch")
-                    .setImageUrl("http://example.com/image.jpg")
-                    .setPrice(100.0)
-                    .setStoreUrl("http://example.com")
-                    .setCurrency(null)
-                    .build();
-        });
-        assertEquals("Currency cannot be empty", exception.getMessage());
-    }
-
-    @Test
-    void testSetStoreUrlThrowsExceptionWhenEmpty() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            new Request.Builder()
-                    .setId(UUID.randomUUID())
-                    .setProductName("Nintendo Switch")
-                    .setImageUrl("http://example.com/image.jpg")
-                    .setPrice(100.0)
-                    .setStoreUrl("")
-                    .setCurrency("USD")
-                    .build();
-        });
-        assertEquals("Store URL cannot be empty", exception.getMessage());
-    }
-
-    @Test
     void testSetStoreUrlSuccessfullyWhenValid() {
         String validStoreUrl = "http://example.com/new_store";
         Request request = new Request.Builder()
@@ -637,52 +621,6 @@ public class RequestTest {
                 .build();
 
         assertEquals(validStoreUrl, request.getStoreUrl());
-    }
-
-    @Test
-    void testSetStoreUrlThrowsExceptionWhenNull() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            new Request.Builder()
-                    .setId(UUID.randomUUID())
-                    .setProductName("Nintendo Switch")
-                    .setImageUrl("http://example.com/image.jpg")
-                    .setPrice(100.0)
-                    .setStoreUrl(null)
-                    .setCurrency("USD")
-                    .build();
-        });
-        assertEquals("Store URL cannot be empty", exception.getMessage());
-    }
-
-    // Setter tests for imageUrl
-    @Test
-    void testSetImageUrlThrowsExceptionWhenNull() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            new Request.Builder()
-                    .setId(UUID.randomUUID())
-                    .setProductName("Nintendo Switch")
-                    .setImageUrl(null)
-                    .setPrice(100.0)
-                    .setStoreUrl("http://example.com")
-                    .setCurrency("USD")
-                    .build();
-        });
-        assertEquals("Image URL cannot be empty", exception.getMessage());
-    }
-
-    @Test
-    void testSetImageUrlThrowsExceptionWhenEmpty() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            new Request.Builder()
-                    .setId(UUID.randomUUID())
-                    .setProductName("Nintendo Switch")
-                    .setImageUrl("")
-                    .setPrice(100.0)
-                    .setStoreUrl("http://example.com")
-                    .setCurrency("USD")
-                    .build();
-        });
-        assertEquals("Image URL cannot be empty", exception.getMessage());
     }
 
     @Test
@@ -700,4 +638,33 @@ public class RequestTest {
         assertEquals(validImageUrl, request.getImageUrl());
     }
 
+    @Test
+    void testSetStoreUrlThrowsExceptionWhenEmpty() {
+        assertUrlThrowsException("", "Store URL cannot be empty", "storeUrl");
+    }
+
+    @Test
+    void testSetStoreUrlThrowsExceptionWhenNull() {
+        assertUrlThrowsException(null, "Store URL cannot be empty", "storeUrl");
+    }
+
+    @Test
+    void testSetImageUrlThrowsExceptionWhenEmpty() {
+        assertUrlThrowsException("", "Image URL cannot be empty", "imageUrl");
+    }
+
+    @Test
+    void testSetImageUrlThrowsExceptionWhenNull() {
+        assertUrlThrowsException(null, "Image URL cannot be empty", "imageUrl");
+    }
+
+    @Test
+    void testSetStoreUrlSuccessfully() {
+        assertUrlSuccessfullySet("http://example.com/new_store", "storeUrl");
+    }
+
+    @Test
+    void testSetImageUrlSuccessfully() {
+        assertUrlSuccessfullySet("http://example.com/new_image.jpg", "imageUrl");
+    }
 }

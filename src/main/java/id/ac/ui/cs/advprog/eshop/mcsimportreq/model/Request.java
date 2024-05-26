@@ -87,7 +87,7 @@ public class Request {
         }
 
         public Builder setStatus(String status) {
-            if (StringUtils.isEmpty(status) || status == null) {
+            if (StringUtils.isEmpty(status)) {
                 throw new IllegalArgumentException("Status cannot be empty");
             }
             this.status = status;
