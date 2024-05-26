@@ -7,7 +7,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
-
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -22,11 +21,13 @@ public class SecurityConfig {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/**/public/**").permitAll()
-                        .requestMatchers("/**/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/**/customer/**").hasRole("CUSTOMER")
-                        .requestMatchers("/**/user/**").hasRole("USER")
-                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/**/*.js").permitAll()
+                        .requestMatchers("/**/login").permitAll()
+                        .requestMatchers("/**/signup").permitAll()
+                        .requestMatchers("/api-requests/public/**").permitAll()
+                        .requestMatchers("/api-requests/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api-requests/customer/**").hasRole("CUSTOMER")
+                        .requestMatchers("/api-requests/user/**").hasRole("USER")
                         .anyRequest().authenticated()
                 ).addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
