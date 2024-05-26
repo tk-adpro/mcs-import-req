@@ -19,6 +19,7 @@ public class RequestServiceImpl implements RequestService {
     @Autowired
     private RequestRepository requestRepository;
     private static final String API_URL = "https://api.exchangerate-api.com/v4/latest/IDR";
+    private static final String REQUEST_NOT_FOUND_MESSAGE = "Request not found";
 
     @Autowired
     private RestTemplate restTemplate;
@@ -37,7 +38,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public Request getRequestById(UUID requestId) {
-        return requestRepository.findRequestById(requestId).orElseThrow(() -> new IllegalArgumentException("Request not found"));
+        return requestRepository.findRequestById(requestId).orElseThrow(() -> new IllegalArgumentException(REQUEST_NOT_FOUND_MESSAGE));
     }
 
     @Override
@@ -47,7 +48,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public Request updateRequest(UUID requestId, Request updatedRequest) {
-        Request existingRequest = requestRepository.findRequestById(requestId).orElseThrow(() -> new IllegalArgumentException("Request not found"));
+        Request existingRequest = requestRepository.findRequestById(requestId).orElseThrow(() -> new IllegalArgumentException(REQUEST_NOT_FOUND_MESSAGE));
         validateCurrency(updatedRequest.getCurrency());
         double convertedPrice = convertToIDR(updatedRequest.getPrice(), updatedRequest.getCurrency());
         updatedRequest.setPrice(convertedPrice);
@@ -68,7 +69,7 @@ public class RequestServiceImpl implements RequestService {
         Map<String, Double> rates = (Map<String, Double>) response.get("rates");
         if (rates.containsKey(currencyCode)) {
             double plainRate = rates.get(currencyCode);
-            BigDecimal scientificNumber = new BigDecimal(plainRate);
+            BigDecimal scientificNumber = BigDecimal.valueOf(plainRate);
 
             // Convert it to plain string representation
             String plainString = scientificNumber.toPlainString();
@@ -89,7 +90,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public Request updateRequestStatus(UUID requestId, String status) {
-        Request request = requestRepository.findRequestById(requestId).orElseThrow(() -> new IllegalArgumentException("Request not found"));
+        Request request = requestRepository.findRequestById(requestId).orElseThrow(() -> new IllegalArgumentException(REQUEST_NOT_FOUND_MESSAGE));
         request.setStatus(status);
         return requestRepository.save(request);
     }

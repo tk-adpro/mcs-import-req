@@ -156,7 +156,7 @@ public class RequestServiceTest {
 
     @Test
     void testUpdateRequest_RequestNotFound() {
-        UUID requestId = UUID.randomUUID();
+        UUID newRequestId = UUID.randomUUID();
         Request updatedRequest = new Request.Builder()
                 .setId(requestId)
                 .setProductName("Updated Product Name")
@@ -166,13 +166,13 @@ public class RequestServiceTest {
                 .setCurrency("USD")
                 .build();
 
-        when(requestRepository.findRequestById(requestId)).thenReturn(Optional.empty());
+        when(requestRepository.findRequestById(newRequestId)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class, () -> {
-            requestService.updateRequest(requestId, updatedRequest);
+            requestService.updateRequest(newRequestId, updatedRequest);
         });
 
-        verify(requestRepository, times(1)).findRequestById(requestId);
+        verify(requestRepository, times(1)).findRequestById(newRequestId);
         verifyNoMoreInteractions(requestRepository);
     }
 
@@ -187,15 +187,15 @@ public class RequestServiceTest {
 
     @Test
     void testDeleteRequest_NotFound() {
-        UUID requestId = UUID.randomUUID();
-        doThrow(new IllegalArgumentException("Request not found")).when(requestRepository).deleteRequestById(requestId);
+        UUID newRequestId = UUID.randomUUID();
+        doThrow(new IllegalArgumentException("Request not found")).when(requestRepository).deleteRequestById(newRequestId);
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            requestService.deleteRequest(requestId);
+            requestService.deleteRequest(newRequestId);
         });
 
         assertEquals("Request not found", exception.getMessage());
-        verify(requestRepository, times(1)).deleteRequestById(requestId);
+        verify(requestRepository, times(1)).deleteRequestById(newRequestId);
     }
 
     @Test
