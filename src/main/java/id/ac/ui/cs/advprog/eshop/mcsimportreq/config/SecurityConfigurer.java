@@ -26,7 +26,7 @@ public class SecurityConfigurer {
                         .requestMatchers("/api/requests/{requestId}").permitAll()
                         .requestMatchers("/api/requests").permitAll()
                         .requestMatchers("/api/requests/status/{requestId}").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // Use stateless session management
 
