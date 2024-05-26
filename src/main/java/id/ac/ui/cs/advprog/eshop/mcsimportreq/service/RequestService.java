@@ -17,4 +17,6 @@ public interface RequestService {
 
     void deleteRequest(UUID requestId);
     double getExchangeRate(String currencyCode);
+
+    Request updateRequestStatus(UUID requestId, String status);
 }

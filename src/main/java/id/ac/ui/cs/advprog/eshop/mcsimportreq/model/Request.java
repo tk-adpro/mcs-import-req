@@ -16,6 +16,7 @@ public class Request {
     private Double price;
     private String storeUrl;
     private String currency;
+    private String status;
 
     // No-arg constructor
     public Request() {
@@ -28,6 +29,7 @@ public class Request {
         this.price = builder.price;
         this.storeUrl = builder.storeUrl;
         this.currency = builder.currency;
+        this.status = builder.status;
     }
 
     public static class Builder {
@@ -37,6 +39,7 @@ public class Request {
         private Double price;
         private String storeUrl;
         private String currency;
+        private String status;
 
         public Builder setId(UUID id) {
             this.id = id;
@@ -80,6 +83,14 @@ public class Request {
                 throw new IllegalArgumentException("Currency cannot be empty");
             }
             this.currency = currency;
+            return this;
+        }
+
+        public Builder setStatus(String status) {
+            if (StringUtils.isEmpty(status) || status == null) {
+                throw new IllegalArgumentException("Status cannot be empty");
+            }
+            this.status = status;
             return this;
         }
 

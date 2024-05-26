@@ -10,11 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -66,8 +62,20 @@ public class RequestServiceTest {
     }
 
     @Test
+    void testSaveRequest_InvalidCurrency() {
+        request.setCurrency("XYZ"); // Invalid currency code
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            requestService.saveRequest(request);
+        });
+
+        assertEquals("Invalid currency code: XYZ", exception.getMessage());
+        verifyNoInteractions(requestRepository);
+    }
+
+    @Test
     void testGetRequestById_Success() {
-        when(requestRepository.findRequestById(requestId)).thenReturn(request);
+        when(requestRepository.findRequestById(requestId)).thenReturn(Optional.of(request));
 
         Request foundRequest = requestService.getRequestById(requestId);
 
@@ -77,146 +85,15 @@ public class RequestServiceTest {
     }
 
     @Test
-    void testUpdateRequest_Success() {
-        Request updatedRequest = new Request.Builder()
-                .setId(requestId)
-                .setProductName("Updated Product Name")
-                .setImageUrl("http://example.com/updated_image.jpg")
-                .setPrice(150.0)
-                .setStoreUrl("http://example.com/updated")
-                .setCurrency("USD")
-                .build();
+    void testGetRequestById_NotFound() {
+        when(requestRepository.findRequestById(requestId)).thenReturn(Optional.empty());
 
-        when(requestRepository.findRequestById(requestId)).thenReturn(request);
-        when(requestRepository.save(updatedRequest)).thenReturn(updatedRequest);
-
-        Map<String, Object> apiResponse = new HashMap<>();
-        Map<String, Double> rates = new HashMap<>();
-        rates.put("USD", 14000.0);
-        rates.put("JPY", 130.0);
-        rates.put("IDR", 1.0); // Assuming IDR has an exchange rate of 1.0 for simplicity
-        apiResponse.put("rates", rates);
-        when(restTemplate.getForObject(anyString(), eq(Map.class))).thenReturn(apiResponse);
-
-        Request result = requestService.updateRequest(requestId, updatedRequest);
-
-        assertNotNull(result);
-        assertEquals(updatedRequest, result);
-        verify(requestRepository, times(1)).findRequestById(requestId);
-        verify(requestRepository, times(1)).save(updatedRequest);
-    }
-
-    @Test
-    void testUpdateRequest_RequestNotFound() {
-        UUID requestId = UUID.randomUUID();
-        Request updatedRequest = new Request.Builder()
-                .setId(requestId)
-                .setProductName("Updated Product Name")
-                .setImageUrl("http://example.com/updated_image.jpg")
-                .setPrice(150.0)
-                .setStoreUrl("http://example.com/updated")
-                .setCurrency("USD")
-                .build();
-
-        when(requestRepository.findRequestById(requestId)).thenReturn(null);
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            requestService.updateRequest(requestId, updatedRequest);
-        });
-
-        verify(requestRepository, times(1)).findRequestById(requestId);
-        verifyNoMoreInteractions(requestRepository);
-    }
-
-    @Test
-    void testSaveRequest_InvalidCurrency() {
-        request.setCurrency("XYZ"); // Currency code yang tidak valid
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            requestService.saveRequest(request);
-        });
-
-        verifyNoInteractions(requestRepository);
-    }
-
-    @Test
-    void testDeleteRequest_Success() {
-        doNothing().when(requestRepository).deleteRequestById(requestId);
-
-        assertDoesNotThrow(() -> requestService.deleteRequest(requestId));
-
-        verify(requestRepository, times(1)).deleteRequestById(requestId);
-    }
-
-    @Test
-    void testDeleteRequest_Failure() {
-        UUID requestId = UUID.randomUUID();
-        doThrow(new IllegalArgumentException("Request not found")).when(requestRepository).deleteRequestById(requestId);
-
-        assertThrows(IllegalArgumentException.class, () -> requestService.deleteRequest(requestId));
-
-        verify(requestRepository, times(1)).deleteRequestById(requestId);
-    }
-
-    @Test
-    public void testConvertToIDR_USD() {
-        double price = 10.0;
-        double expectedIDR = 140000.0;
-        Map<String, Object> apiResponse = new HashMap<>();
-        Map<String, Double> rates = new HashMap<>();
-        rates.put("USD", 14000.0);
-        rates.put("JPY", 130.0);
-        rates.put("IDR", 1.0); // Assuming IDR has an exchange rate of 1.0 for simplicity
-        apiResponse.put("rates", rates);
-        when(restTemplate.getForObject(anyString(), eq(Map.class))).thenReturn(apiResponse);
-
-        double actualIDR = requestService.convertToIDR(price, "USD");
-        assertEquals(expectedIDR, actualIDR, 0.01); // allow for small floating-point errors
-    }
-
-    @Test
-    public void testConvertToIDR_JPY() {
-        double price = 1000.0;
-        double expectedIDR = 130000.0;
-        Map<String, Object> apiResponse = new HashMap<>();
-        Map<String, Double> rates = new HashMap<>();
-        rates.put("USD", 14000.0);
-        rates.put("JPY", 130.0);
-        rates.put("IDR", 1.0); // Assuming IDR has an exchange rate of 1.0 for simplicity
-        apiResponse.put("rates", rates);
-        when(restTemplate.getForObject(anyString(), eq(Map.class))).thenReturn(apiResponse);
-
-        double actualIDR = requestService.convertToIDR(price, "JPY");
-        assertEquals(expectedIDR, actualIDR, 0.01); // allow for small floating-point errors
-    }
-
-    @Test
-    public void testConvertToIDR_IDR() {
-        double price = 15000.0;
-        double expectedIDR = 15000.0;
-        double actualIDR = requestService.convertToIDR(price, "IDR");
-        assertEquals(expectedIDR, actualIDR);
-    }
-
-    @Test
-    public void testConvertToIDR_UnsupportedCurrency() {
-        double price = 10.0;
-        String unsupportedCurrency = "XXX";
-
-        // Mocking external API call for exchange rates
-        Map<String, Object> apiResponse = new HashMap<>();
-        Map<String, Double> rates = new HashMap<>();
-        rates.put("USD", 14000.0);
-        rates.put("JPY", 130.0);
-        apiResponse.put("rates", rates);
-        when(restTemplate.getForObject(anyString(), eq(Map.class))).thenReturn(apiResponse);
-
-        // Ensure the exception is thrown
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            requestService.convertToIDR(price, unsupportedCurrency);
+            requestService.getRequestById(requestId);
         });
 
-        assertEquals("Unsupported currency", exception.getMessage());
+        assertEquals("Request not found", exception.getMessage());
+        verify(requestRepository, times(1)).findRequestById(requestId);
     }
 
     @Test
@@ -247,6 +124,81 @@ public class RequestServiceTest {
     }
 
     @Test
+    void testUpdateRequest_Success() {
+        Request updatedRequest = new Request.Builder()
+                .setId(requestId)
+                .setProductName("Updated Product Name")
+                .setImageUrl("http://example.com/updated_image.jpg")
+                .setPrice(150.0)
+                .setStoreUrl("http://example.com/updated")
+                .setCurrency("USD")
+                .build();
+
+        when(requestRepository.findRequestById(requestId)).thenReturn(Optional.of(request));
+        when(requestRepository.save(any(Request.class))).thenReturn(updatedRequest);
+
+        Map<String, Object> apiResponse = new HashMap<>();
+        Map<String, Double> rates = new HashMap<>();
+        rates.put("USD", 14000.0);
+        rates.put("JPY", 130.0);
+        rates.put("IDR", 1.0); // Assuming IDR has an exchange rate of 1.0 for simplicity
+        apiResponse.put("rates", rates);
+        when(restTemplate.getForObject(anyString(), eq(Map.class))).thenReturn(apiResponse);
+
+        Request result = requestService.updateRequest(requestId, updatedRequest);
+
+        assertNotNull(result);
+        assertEquals(updatedRequest.getPrice(), result.getPrice());
+        assertEquals(updatedRequest.getImageUrl(), result.getImageUrl());
+        verify(requestRepository, times(1)).findRequestById(requestId);
+        verify(requestRepository, times(1)).save(updatedRequest);
+    }
+
+    @Test
+    void testUpdateRequest_RequestNotFound() {
+        UUID requestId = UUID.randomUUID();
+        Request updatedRequest = new Request.Builder()
+                .setId(requestId)
+                .setProductName("Updated Product Name")
+                .setImageUrl("http://example.com/updated_image.jpg")
+                .setPrice(150.0)
+                .setStoreUrl("http://example.com/updated")
+                .setCurrency("USD")
+                .build();
+
+        when(requestRepository.findRequestById(requestId)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            requestService.updateRequest(requestId, updatedRequest);
+        });
+
+        verify(requestRepository, times(1)).findRequestById(requestId);
+        verifyNoMoreInteractions(requestRepository);
+    }
+
+    @Test
+    void testDeleteRequest_Success() {
+        doNothing().when(requestRepository).deleteRequestById(requestId);
+
+        assertDoesNotThrow(() -> requestService.deleteRequest(requestId));
+
+        verify(requestRepository, times(1)).deleteRequestById(requestId);
+    }
+
+    @Test
+    void testDeleteRequest_NotFound() {
+        UUID requestId = UUID.randomUUID();
+        doThrow(new IllegalArgumentException("Request not found")).when(requestRepository).deleteRequestById(requestId);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            requestService.deleteRequest(requestId);
+        });
+
+        assertEquals("Request not found", exception.getMessage());
+        verify(requestRepository, times(1)).deleteRequestById(requestId);
+    }
+
+    @Test
     void testGetExchangeRate_Success() {
         Map<String, Object> apiResponse = new HashMap<>();
         Map<String, Double> rates = new HashMap<>();
@@ -272,27 +224,90 @@ public class RequestServiceTest {
         assertEquals("Unsupported currency", exception.getMessage());
     }
 
-//    @Test
-//    void testGetExchangeRate_MissingRates() {
-//        Map<String, Object> apiResponse = new HashMap<>();
-//        when(restTemplate.getForObject(anyString(), eq(Map.class))).thenReturn(apiResponse);
-//
-//        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-//            requestService.getExchangeRate("USD");
-//        });
-//        assertEquals("Unsupported currency", exception.getMessage());
-//    }
-
     @Test
-    void testSaveRequest_ValidCurrency() {
-        when(requestRepository.save(request)).thenReturn(request);
-
+    void testConvertToIDR_USD() {
+        double price = 10.0;
+        double expectedIDR = 140000.0;
         Map<String, Object> apiResponse = new HashMap<>();
         Map<String, Double> rates = new HashMap<>();
         rates.put("USD", 14000.0);
+        rates.put("JPY", 130.0);
+        rates.put("IDR", 1.0); // Assuming IDR has an exchange rate of 1.0 for simplicity
         apiResponse.put("rates", rates);
         when(restTemplate.getForObject(anyString(), eq(Map.class))).thenReturn(apiResponse);
 
-        assertDoesNotThrow(() -> requestService.saveRequest(request));
+        double actualIDR = requestService.convertToIDR(price, "USD");
+        assertEquals(expectedIDR, actualIDR, 0.01); // allow for small floating-point errors
+    }
+
+    @Test
+    void testConvertToIDR_JPY() {
+        double price = 1000.0;
+        double expectedIDR = 130000.0;
+        Map<String, Object> apiResponse = new HashMap<>();
+        Map<String, Double> rates = new HashMap<>();
+        rates.put("USD", 14000.0);
+        rates.put("JPY", 130.0);
+        rates.put("IDR", 1.0); // Assuming IDR has an exchange rate of 1.0 for simplicity
+        apiResponse.put("rates", rates);
+        when(restTemplate.getForObject(anyString(), eq(Map.class))).thenReturn(apiResponse);
+
+        double actualIDR = requestService.convertToIDR(price, "JPY");
+        assertEquals(expectedIDR, actualIDR, 0.01); // allow for small floating-point errors
+    }
+
+    @Test
+    void testConvertToIDR_IDR() {
+        double price = 15000.0;
+        double expectedIDR = 15000.0;
+        double actualIDR = requestService.convertToIDR(price, "IDR");
+        assertEquals(expectedIDR, actualIDR);
+    }
+
+    @Test
+    void testConvertToIDR_UnsupportedCurrency() {
+        double price = 10.0;
+        String unsupportedCurrency = "XXX";
+
+        // Mocking external API call for exchange rates
+        Map<String, Object> apiResponse = new HashMap<>();
+        Map<String, Double> rates = new HashMap<>();
+        rates.put("USD", 14000.0);
+        rates.put("JPY", 130.0);
+        apiResponse.put("rates", rates);
+        when(restTemplate.getForObject(anyString(), eq(Map.class))).thenReturn(apiResponse);
+
+        // Ensure the exception is thrown
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            requestService.convertToIDR(price, unsupportedCurrency);
+        });
+
+        assertEquals("Unsupported currency", exception.getMessage());
+    }
+
+    @Test
+    void testUpdateRequestStatus_Success() {
+        when(requestRepository.findRequestById(requestId)).thenReturn(Optional.of(request));
+        when(requestRepository.save(any(Request.class))).thenReturn(request);
+
+        Request updatedRequest = requestService.updateRequestStatus(requestId, "approved");
+
+        assertNotNull(updatedRequest);
+        assertEquals("approved", updatedRequest.getStatus());
+        verify(requestRepository, times(1)).findRequestById(requestId);
+        verify(requestRepository, times(1)).save(request);
+    }
+
+    @Test
+    void testUpdateRequestStatus_NotFound() {
+        when(requestRepository.findRequestById(requestId)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            requestService.updateRequestStatus(requestId, "approved");
+        });
+
+        assertEquals("Request not found", exception.getMessage());
+        verify(requestRepository, times(1)).findRequestById(requestId);
+        verifyNoMoreInteractions(requestRepository);
     }
 }

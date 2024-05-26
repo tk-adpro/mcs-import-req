@@ -5,11 +5,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RequestRepositoryTest {
 
@@ -50,25 +50,27 @@ public class RequestRepositoryTest {
     @Test
     void testFindRequestById() {
         UUID requestId = request.getId();
-        Request foundRequest = requestRepository.findRequestById(requestId);
+        Optional<Request> foundRequest = requestRepository.findRequestById(requestId);
 
-        assertEquals(request, foundRequest);
+        assertThat(foundRequest).isPresent();
+        assertEquals(request, foundRequest.get());
     }
 
     @Test
     void testFindByIdIfIdFound() {
         UUID requestId = request.getId();
-        Request foundRequest = requestRepository.findRequestById(requestId);
+        Optional<Request> foundRequest = requestRepository.findRequestById(requestId);
 
-        assertEquals(request, foundRequest);
+        assertThat(foundRequest).isPresent();
+        assertEquals(request, foundRequest.get());
     }
 
     @Test
     void testFindByIdIfIdNotFound() {
         UUID requestId = UUID.randomUUID();
-        Request foundRequest = requestRepository.findRequestById(requestId);
+        Optional<Request> foundRequest = requestRepository.findRequestById(requestId);
 
-        assertNull(foundRequest);
+        assertThat(foundRequest).isNotPresent();
     }
 
     @Test
@@ -84,10 +86,11 @@ public class RequestRepositoryTest {
 
         requestRepository.save(updatedRequest);
 
-        Request fetchedRequest = requestRepository.findRequestById(request.getId());
+        Optional<Request> fetchedRequest = requestRepository.findRequestById(request.getId());
 
-        assertEquals(150.0, fetchedRequest.getPrice());
-        assertEquals("http://example.com/new_image.jpg", fetchedRequest.getImageUrl());
+        assertThat(fetchedRequest).isPresent();
+        assertEquals(150.0, fetchedRequest.get().getPrice());
+        assertEquals("http://example.com/new_image.jpg", fetchedRequest.get().getImageUrl());
         assertEquals(1, requestRepository.getAllRequests().size());
     }
 
@@ -96,7 +99,9 @@ public class RequestRepositoryTest {
         UUID requestId = request.getId();
         requestRepository.deleteRequestById(requestId);
 
-        assertNull(requestRepository.findRequestById(requestId));
+        Optional<Request> foundRequest = requestRepository.findRequestById(requestId);
+
+        assertThat(foundRequest).isNotPresent();
         assertEquals(0, requestRepository.getAllRequests().size());
     }
 
@@ -104,9 +109,9 @@ public class RequestRepositoryTest {
     void testDeleteNonExistingRequest() {
         UUID requestId = UUID.randomUUID();
         requestRepository.deleteRequestById(requestId);
-        Request foundRequest = requestRepository.findRequestById(requestId);
+        Optional<Request> foundRequest = requestRepository.findRequestById(requestId);
 
-        assertNull(foundRequest);
+        assertThat(foundRequest).isNotPresent();
         assertEquals(1, requestRepository.getAllRequests().size());
     }
 
@@ -142,7 +147,8 @@ public class RequestRepositoryTest {
         requestRepository.save(duplicateRequest);
 
         assertEquals(1, requestRepository.getAllRequests().size());
-        Request foundRequest = requestRepository.findRequestById(request.getId());
-        assertEquals(duplicateRequest, foundRequest);
+        Optional<Request> foundRequest = requestRepository.findRequestById(request.getId());
+        assertThat(foundRequest).isPresent();
+        assertEquals(duplicateRequest, foundRequest.get());
     }
 }

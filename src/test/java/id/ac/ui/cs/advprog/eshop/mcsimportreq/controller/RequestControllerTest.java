@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -164,5 +165,35 @@ public class RequestControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(requests, response.getBody());
+    }
+
+    @Test
+    void updateRequestStatus_Success() {
+        UUID requestId = UUID.randomUUID();
+        Request request = new Request.Builder()
+                .setId(requestId)
+                .setProductName("Product Name")
+                .setImageUrl("http://example.com/image.jpg")
+                .setPrice(100.0)
+                .setStoreUrl("http://example.com")
+                .setCurrency("USD")
+                .setStatus("waiting")
+                .build();
+        when(requestService.updateRequestStatus(requestId, "approved")).thenReturn(request);
+
+        ResponseEntity<Request> response = requestController.updateRequestStatus(requestId, Map.of("status", "approved"));
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(request, response.getBody());
+    }
+
+    @Test
+    void updateRequestStatus_NotFound() {
+        UUID requestId = UUID.randomUUID();
+        when(requestService.updateRequestStatus(requestId, "approved")).thenThrow(new IllegalArgumentException("Request not found"));
+
+        ResponseEntity<Request> response = requestController.updateRequestStatus(requestId, Map.of("status", "approved"));
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 }

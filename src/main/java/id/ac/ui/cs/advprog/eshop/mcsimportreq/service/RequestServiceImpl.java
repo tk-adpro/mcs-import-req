@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -29,13 +30,14 @@ public class RequestServiceImpl implements RequestService {
         double convertedPrice = convertToIDR(request.getPrice(), request.getCurrency());
 
         request.setPrice(convertedPrice);
+        request.setStatus("waiting"); // Set default status to 'waiting'
 
         return requestRepository.save(request);
     }
 
     @Override
     public Request getRequestById(UUID requestId) {
-        return requestRepository.findRequestById(requestId);
+        return requestRepository.findRequestById(requestId).orElseThrow(() -> new IllegalArgumentException("Request not found"));
     }
 
     @Override
@@ -45,14 +47,12 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public Request updateRequest(UUID requestId, Request updatedRequest) {
-        Request existingRequest = requestRepository.findRequestById(requestId);
-        if (existingRequest == null) {
-            throw new IllegalArgumentException("Request not found");
-        }
+        Request existingRequest = requestRepository.findRequestById(requestId).orElseThrow(() -> new IllegalArgumentException("Request not found"));
         validateCurrency(updatedRequest.getCurrency());
         double convertedPrice = convertToIDR(updatedRequest.getPrice(), updatedRequest.getCurrency());
         updatedRequest.setPrice(convertedPrice);
         updatedRequest.setId(requestId);
+        updatedRequest.setStatus(existingRequest.getStatus()); // Preserve the existing status
         return requestRepository.save(updatedRequest);
     }
 
@@ -61,25 +61,7 @@ public class RequestServiceImpl implements RequestService {
         requestRepository.deleteRequestById(requestId);
     }
 
-//    private void validateCurrency(String currencyCode) {
-//        try {
-//            Currency currency = Currency.getInstance(currencyCode);
-//        } catch (IllegalArgumentException e) {
-//            throw new IllegalArgumentException("Invalid currency code");
-//        }
-//    }
-
-    private void validateCurrency(String currencyCode) {
-        if (currencyCode == null || currencyCode.isEmpty()) {
-            throw new IllegalArgumentException("Currency code cannot be null or empty");
-        }
-        try {
-            Currency.getInstance(currencyCode);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid currency code: " + currencyCode);
-        }
-    }
-
+    @Override
     public double getExchangeRate(String currencyCode) {
         Map<String, Object> response = restTemplate.getForObject(API_URL, Map.class);
 
@@ -102,6 +84,24 @@ public class RequestServiceImpl implements RequestService {
         } else {
             double rate = getExchangeRate(currencyCode);
             return price * rate;
+        }
+    }
+
+    @Override
+    public Request updateRequestStatus(UUID requestId, String status) {
+        Request request = requestRepository.findRequestById(requestId).orElseThrow(() -> new IllegalArgumentException("Request not found"));
+        request.setStatus(status);
+        return requestRepository.save(request);
+    }
+
+    private void validateCurrency(String currencyCode) {
+        if (currencyCode == null || currencyCode.isEmpty()) {
+            throw new IllegalArgumentException("Currency code cannot be null or empty");
+        }
+        try {
+            Currency.getInstance(currencyCode);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid currency code: " + currencyCode);
         }
     }
 }

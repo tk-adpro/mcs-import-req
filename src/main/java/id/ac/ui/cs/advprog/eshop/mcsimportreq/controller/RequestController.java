@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @CrossOrigin(origins = "*")
@@ -63,4 +64,16 @@ public class RequestController {
         List<Request> requests = requestService.getAllRequests();
         return new ResponseEntity<>(requests, HttpStatus.OK);
     }
+
+    @PutMapping("/status/{requestId}")
+    public ResponseEntity<Request> updateRequestStatus(@PathVariable UUID requestId, @RequestBody Map<String, String> statusUpdate) {
+        try {
+            String status = statusUpdate.get("status");
+            Request updatedRequest = requestService.updateRequestStatus(requestId, status);
+            return new ResponseEntity<>(updatedRequest, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
 }
