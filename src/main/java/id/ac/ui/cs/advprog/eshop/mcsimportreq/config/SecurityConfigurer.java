@@ -18,9 +18,18 @@ public class SecurityConfigurer {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests((authz) -> authz
-                        .anyRequest().permitAll()
-                );
+                .csrf(csrf -> csrf.disable()) // Disable CSRF protection for testing
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/api/requests/create").permitAll()
+                        .requestMatchers("/api/requests/edit/**").permitAll()
+                        .requestMatchers("/api/requests/delete/**").permitAll()
+                        .requestMatchers("/api/requests/{requestId}").permitAll()
+                        .requestMatchers("/api/requests").permitAll()
+                        .requestMatchers("/api/requests/status/{requestId}").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // Use stateless session management
+
         return http.build();
     }
 
